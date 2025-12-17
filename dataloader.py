@@ -11,7 +11,7 @@ def get_dataset_params():
         'test_image_dir': "C:/face_data/Validation/images/",
         'test_label_dir': "C:/face_data/Validation/labels/",
         'classes':['기쁨', '당황', '분노', '불안', '상처', '슬픔'],
-        "input_dim": [360, 360],
+        "input_dim": [512, 512],
         'batch_size': 32
     }
     return dataset_params
@@ -26,7 +26,7 @@ def dataloader(params):
         },
         dataloader_params={
             'batch_size': params['batch_size'],
-            'num_workers': 8,
+            'num_workers': 24,
             'pin_memory': True,
             'drop_last': True
         }
@@ -40,7 +40,7 @@ def dataloader(params):
         },
         dataloader_params={
             'batch_size': params['batch_size'],
-            'num_workers': 8,
+            'num_workers': 24,
             'pin_memory': True,
             'drop_last': True
         }
