@@ -1,16 +1,13 @@
 from super_gradients.training.losses import PPYoloELoss
 from super_gradients.training.metrics import DetectionMetrics_050
-from super_gradients.training.models.detection_models.pp_yolo_e import post_prediction_callback
-
-def get_train_parmas():
-    from super_gradients.training.losses import PPYoloELoss
-    from super_gradients.training.metrics import DetectionMetrics_050
-    from super_gradients.training.models.detection_models.pp_yolo_e import PPYoloEPostPredictionCallback
-
+from super_gradients.training.models.detection_models.pp_yolo_e import PPYoloEPostPredictionCallback
+def get_train_params():
     train_params = {
         'silent_mode': False,
-        "average_best_models": True,
-        "run_validation_freq": 5,
+        "average_best_models": False,
+        "run_validation_freq": 1,
+        "resume": True,
+        "resume_path": "C:/Users/User/PycharmProjects/IdeaFev/checkpoints/IdeaFev_experiment/RUN_20251218_021451_420740/ckpt_best.pth",
         "warmup_mode": "linear_epoch_step",
         "warmup_initial_lr": 1e-6,
         "lr_warmup_epochs": 3,
@@ -20,7 +17,7 @@ def get_train_parmas():
         "optimizer": "Adam",
         "optimizer_params": {"weight_decay": 0.0001},
         "zero_weight_decay_on_bias_and_bn": True,
-        "ema": True,
+        "ema": False,
         "ema_params": {"decay": 0.9, "decay_type": "threshold"},
         "max_epochs": 50,
         "mixed_precision": True,
