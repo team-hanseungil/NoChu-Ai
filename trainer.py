@@ -5,9 +5,9 @@ def get_train_params():
     train_params = {
         'silent_mode': False,
         "average_best_models": False,
-        "run_validation_freq": 1,
+        "run_validation_freq": 5,
         "resume": True,
-        "resume_path": "C:/Users/User/PycharmProjects/IdeaFev/checkpoints/IdeaFev_experiment/RUN_20251218_021451_420740/ckpt_best.pth",
+        "resume_path": "C:/Users/User/PycharmProjects/IdeaFev/checkpoints/IdeaFev_experiment/RUN_20251218_092101_692962/ckpt_latest.pth",
         "warmup_mode": "linear_epoch_step",
         "warmup_initial_lr": 1e-6,
         "lr_warmup_epochs": 3,
