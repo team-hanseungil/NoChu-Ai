@@ -11,7 +11,7 @@ def test(test_data):
     best_model = models.get(
         'yolo_nas_s',
         num_classes=6,
-        checkpoint_path="./checkpoints/IdeaFev_experiment/RUN_20251218_135014_616681/ckpt_latest.pth"
+        checkpoint_path=r"C:\Users\User\PycharmProjects\IdeaFev\checkpoints\IdeaFev_experiment\RUN_20251219_200811_989705\ckpt_best.pth"
     )
 
     checkpoints_dir = './checkpoints'

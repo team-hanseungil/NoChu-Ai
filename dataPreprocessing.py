@@ -2,7 +2,6 @@ import json
 import os
 from PIL import Image
 
-# ✅ 전역 클래스 고정 (YOLO에서 매우 중요)
 CLASSES = {
     "기쁨": 0,
     "당황": 1,
@@ -91,8 +90,8 @@ def json_to_yolo_txt(json_path, image_dir, label_dir, ix):
 
 
 if __name__ == "__main__":
-    image_dir = "C:/face_data/Training/images/"
-    label_dir = "C:/face_data/Training/labels/"
+    image_dir = "C:/face_data/Validation/images/"
+    label_dir = "C:/face_data/Validation/labels/"
 
     # ✅ classes.txt는 한 번만 생성
     with open(os.path.join(label_dir, "classes.txt"), "w", encoding="utf-8") as f:
