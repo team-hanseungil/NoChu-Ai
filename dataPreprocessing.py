@@ -93,7 +93,6 @@ if __name__ == "__main__":
     image_dir = "C:/face_data/Validation/images/"
     label_dir = "C:/face_data/Validation/labels/"
 
-    # ✅ classes.txt는 한 번만 생성
     with open(os.path.join(label_dir, "classes.txt"), "w", encoding="utf-8") as f:
         for name in CLASSES.keys():
             f.write(f"{name}\n")

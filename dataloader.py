@@ -45,16 +45,4 @@ def dataloader(params):
             'drop_last': True
         }
     )
-    # test_data=coco_detection_yolo_format_val(
-    #     dataset_params={
-    #         'data_dir': params['data_dir'],
-    #         'images_dir': params['test_image_dir'],
-    #         'labels_dir': params['test_label_dir'],
-    #         'classes': params['classes'],
-    #     },
-    #     dataloader_params={
-    #         'batch_size': params['batch_size'],
-    #         'num_workers': 4
-    #     }
-    # )
     return train_data, val_data
