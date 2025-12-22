@@ -11,7 +11,7 @@ def get_dataset_params():
         'test_image_dir': "C:/face_data/Validation/images/",
         'test_label_dir': "C:/face_data/Validation/labels/",
         'classes':['기쁨', '당황', '분노', '불안', '상처', '슬픔'],
-        "input_dim": [512, 512],
+        "input_dim": [640, 640],
         'batch_size': 32
     }
     return dataset_params
