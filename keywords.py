@@ -4,9 +4,21 @@ import os
 import dotenv
 from emotion_explanation import get_emotion_explanation
 import json
+from fastapi import FastAPI
+from pydantic import BaseModel
 
+app = FastAPI()
 
-def get_keywords(emotions: json):
+class Emotions(BaseModel):
+		happy : float
+		surprise : float
+		anger : float
+		anxiety : float
+		hurt : float
+		sad : float
+    
+@app.post("/api/ai/keywords")
+async def get_keywords(emotions: Emotions):
     dotenv.load_dotenv()
 
     model = ChatGoogleGenerativeAI(model="gemini-flash-latest",
@@ -62,8 +74,12 @@ def get_keywords(emotions: json):
 
     resp = chain.invoke({"emotions": emotions})
 
-    return resp.content
+    return { "keywords": resp.content[0]["text"],
+             "title" : "음악 검색 키워드 생성 결과"}
 
+@app.get("/health")
+async def health():
+      return {"status": "ok"}
 
 if __name__ == "__main__":
     emotion = get_emotion_explanation()
