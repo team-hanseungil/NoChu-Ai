@@ -3,13 +3,14 @@ import supervision as sv
 from super_gradients.training import models
 from super_gradients import setup_device
 
-setup_device(device="cuda")
 
 model = models.get(
     "yolo_nas_s",
     checkpoint_path="./checkpoints/IdeaFev_experiment/RUN_20251218_021451_420740/ckpt_best.pth",
     num_classes=6
 )
+model = model.cuda()
+model.eval()
 CLASS_NAMES = [
     "happy",
     "surprise",

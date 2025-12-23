@@ -29,12 +29,12 @@ def get_train_params():
         "valid_metrics_list": [
             DetectionMetrics_050(
                 score_thres=0.6,
-                top_k_predictions=150,
+                top_k_predictions=100,
                 num_cls=6,
                 normalize_targets=True,
                 post_prediction_callback=PPYoloEPostPredictionCallback(
                     score_threshold=0.6,
-                    nms_top_k=150,
+                    nms_top_k=100,
                     max_predictions=50,
                     nms_threshold=0.5
                 )
