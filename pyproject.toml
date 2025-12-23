@@ -1,0 +1,18 @@
+[project]
+name = "nochu-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10.11"
+dependencies = [
+    "dotenv>=0.9.9",
+    "fastapi>=0.127.0",
+    "langchain>=1.2.0",
+    "langchain-core>=1.2.4",
+    "langchain-google-genai>=4.1.2",
+    "numpy>=1.23.0",
+    "python-multipart>=0.0.21",
+    "super-gradients>=3.7.1",
+    "supervision>=0.27.0",
+    "uvicorn[standard]>=0.40.0",
+]
