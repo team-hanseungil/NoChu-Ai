@@ -16,7 +16,7 @@ setup_device(device="cuda")
 
 model = models.get(
     "yolo_nas_s",
-    checkpoint_path="./model/ckpt_best.pth",
+    checkpoint_path="./model/ckpt_latest.pth",
     num_classes=6
 )
 
@@ -80,7 +80,7 @@ async def emotion_detection(image: UploadFile = File(...)):
 
     result = model.predict(
         img,
-        conf=0.25,
+        conf=0.4,
         iou=0.7
     )
 

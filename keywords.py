@@ -4,93 +4,112 @@ import os
 import dotenv
 from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(prefix="/api/ai", tags=["keywords"])
 
-class Emotions(BaseModel):
+class EmotionRequest(BaseModel):
     happy: float
     surprise: float
     anger: float
     anxiety: float
     hurt: float
     sad: float
+    comment: Optional[str] = None
 
 dotenv.load_dotenv()
 
-model = ChatGoogleGenerativeAI(model="gemini-flash-latest",
-                                   google_api_key=os.getenv("GOOGLE_API_KEY"))
+model = ChatGoogleGenerativeAI(
+    model="gemini-flash-latest",
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", """
-        당신은 Spotify Search API(q 파라미터)를 위한 음악 검색 키워드 생성 전문가입니다.
+You are a Spotify search keyword specialist who generates emotionally resonant Korean music queries.
 
-        **입력**: 감정 분석 결과 JSON 모든 감정의 점수의 합은 1이다.
-        
-        **생성 규칙**:
-        1. **세 가지 정보 모두 종합 분석**
-           - dominant_emotion: 핵심 감정 파악
-           - emotion_summary: 현재 심리 상태 이해
-           - recommended_actions: 음악의 역할 도출 (위로/안정/휴식/기분전환/힐링 등)
-            
-        2. **키워드 형식**
-           - 정확히 3개의 한글 키워드
-           - 쉼표(,)로 구분된 한 줄 문자열
-           - Spotify 검색에 최적화된 형태
-            
-        3. **키워드 구성 요소** (자유 조합)
-           - 분위기: 잔잔한, 차분한, 감성적인, 따뜻한, 경쾌한, 밝은
-           - 감정: 위로, 힐링, 평온, 설렘, 행복, 신남
-           - 장르: 발라드, 인디, 어쿠스틱, 재즈, 팝, 댄스
-           - 템포/스타일: 느린, 경쾌한, 부드러운, 신나는
-        
-        4. **플레이리스트 제목**
-           - 사용자의 감정 상태와 음악의 역할을 반영한 제목
-           - 간결하고 공감 가능한 한글 제목 (20자 내외)
-           - 예: "당신의 마음을 다독이는 플레이리스트", "당신에게 조용한 위로를 건네는 플레이리스트"
-           - 반드시 플레이리스트로 끝낼 것
-         
-        5. **금지 사항**
-           - 완전한 문장, 가사 형태
-           - 조사(은/는/이/가) 사용
-           - 아티스트명, 곡 제목
-           - 따옴표, JSON, 추가 설명 텍스트
-        
-        **반드시 지켜야할 출력 형식**:
-        키워드1, 키워드2, 키워드3
-        플레이리스트 제목
-        **content에 json 형식이나 다른 텍스트 절대 포함 금지**
-            
-        **입력 예시**:
-        {{
-           "happy": 0.6,
-           "surprise": 0.1,
-           "anger": 0.1,
-           "anxiety": 0.1,
-           "hurt": 0,
-           "sad": 0.1
-         }}
-            
-       **출력 예시**:
-        신나는 팝, 경쾌한 댄스, 행복 인디
-        기분 좋은 하루를 위한 플레이리스트
+## Input
+- emotions: A JSON object where all emotion scores sum to 1.0.
+  Emotions: happy, surprise, anger, anxiety, hurt, sad
+- comment: (Optional) A text describing the user's current mood or situation.
+  If provided, use it to refine the keyword tone and playlist title.
+  If not provided, rely solely on the emotion scores.
 
-"""),
+## Step 1 — Weighted Emotion Analysis
+Analyze all emotion scores and determine their influence weights.
+Scores ≥ 0.3 are [HIGH] — must drive the keyword and playlist tone.
+Scores 0.1–0.29 are [MED] — may complement the primary direction.
+Scores < 0.1 are [LOW] — ignore unless no [HIGH] exists.
 
-    ("human", "{emotions}"),
+Extract and weight the following:
+- dominant_emotion: The highest-scoring emotion. This sets the core direction.
+- emotional_blend: Combination of [HIGH] and [MED] emotions and their interplay.
+- mood: Translate emotion scores into musical mood descriptors with weights.
+  Map as follows:
+    sad / hurt         → melancholic, emotional, healing, bittersweet
+    anxiety / anger    → tense, dark, intense, cathartic
+    happy / surprise   → uplifting, bright, energetic, warm
+- tempo: Derive likely tempo feel from the emotional tone.
+- artist_style: Derive likely vocal and arrangement style from the emotional tone.
+  Focus on Korean music styles:
+    sad / hurt         → K-ballad vocals, soft emotional singing, delicate indie vocals
+    anxiety / anger    → intense Korean hip-hop, powerful K-pop vocals, dark Korean R&B
+    happy / surprise   → bright K-pop, energetic Korean dance pop, cheerful K-indie
+- music_role: What the music should do for the listener.
+  Map as follows:
+    sad / hurt         → comfort, empathy, healing
+    anxiety / anger    → calming, release, grounding
+    happy / surprise   → uplift, excitement, energy
+
+## Step 1-B — Comment Analysis (if comment is provided)
+Scan the comment for any explicit Korean genre mentions (e.g., 발라드, 인디, 힙합, R&B, 아이돌, 케이팝).
+If a genre is detected: [OVERRIDE] include that genre in English translation in the search query.
+If no genre is detected: select the most emotionally fitting Korean style freely.
+
+## Step 2 — Build 1 Spotify Search Query
+Build a single natural search query that can be passed directly to the Spotify API search function.
+The query must always include "korean" to surface Korean music results.
+The query must be a single fluent phrase combining [HIGH mood] + [artist_style] + "korean" + [genre if detected].
+Length: 5–9 meaningful words.
+
+## Step 3 — Playlist Title
+Write a single Korean title (under 20 characters) that:
+- Reflects the dominant emotion and music role
+- If comment is provided, reflect its context in the title
+- Feels empathetic and personal, not clinical
+- Must end with "플레이리스트"
+- Uses natural phrasing — no particles (은/는/이/가) mid-sentence unless natural
+
+## Hard Rules
+- Output ONLY the 2-line format below — no JSON, no explanation, no markdown
+- Line 1 must be a single string with all fields joined by " | " — no newline within line 1
+- Line 2 must be the playlist title in Korean
+- Never use artist names, song titles, or lyrics
+- Never use vague filler words alone: "good", "best", "music", "song"
+- If dominant_emotion score < 0.2 (flat distribution), default music_role to healing
+
+## Output Format (exactly 2 lines)
+<mood with weights> | <tempo feel> | <artist_style with weights> | <search query>
+<플레이리스트 제목>"""),
+
+    ("human", "emotions: {emotions}\ncomment: {comment}"),
 ])
 
 chain = prompt | model
 
 @router.post("/keywords")
-async def get_keywords(emotions: Emotions):
-    resp = chain.invoke({"emotions": emotions})
+async def get_keywords(request: EmotionRequest):
+    emotions = request.model_dump(exclude={"comment"})  
+
+    resp = chain.invoke({
+        "emotions": str(emotions),
+        "comment": request.comment or "None"  
+    })
 
     try:
-      result = resp.content[0]["text"]
-
-      keywords, title = result.split("\n")
-    except Exception as e:
-      keywords, title = resp.content.split("\n")
-      return {"keywords": keywords.strip(), "title": title.strip()}
+        result = resp.content[0]["text"]
+        keywords, title = result.strip().split("\n")
+    except Exception:
+        keywords, title = resp.content.strip().split("\n")
 
     return {"keywords": keywords.strip(), "title": title.strip()}

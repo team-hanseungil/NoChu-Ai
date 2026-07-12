@@ -7,7 +7,7 @@ setup_device(device="cuda")
 
 model = models.get(
     "yolo_nas_s",
-    checkpoint_path="./checkpoints/IdeaFev_experiment/RUN_20251218_021451_420740/ckpt_best.pth",
+    checkpoint_path="./model/ckpt_best.pth",
     num_classes=6
 )
 CLASS_NAMES = [

@@ -1,0 +1,41 @@
+name: Stage CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGE_SSH_HOST }}
+          port: ${{ secrets.STAGE_SSH_PORT }}
+          username: ${{ secrets.STAGE_SSH_USERNAME }}
+          password: ${{ secrets.STAGE_SSH_PASSWORD }}
+          script: |
+            set -e
+
+            docker system prune -f
+
+            mkdir -p /home/ubuntu/stage/nochu-ai
+            cd /home/ubuntu/stage/nochu-ai
+
+            if [ ! -d ".git" ]; then
+              git clone -b main https://github.com/team-hanseungil/NoChu-Ai .
+            else
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+
+            docker stop psi01060106/nochu-ai || true
+            docker rm psi01060106/nochu-ai || true
+            docker build -t psi01060106/nochu-ai .
+            docker run -d --name nochu-ai -p 8080:8080 psi01060106/nochu-ai
